@@ -25,7 +25,6 @@ object Amazon {
   private val REQUEST_URI = "/onca/xml"
   private val REQUEST_METHOD = "GET"
   private val endpoint = "ecs.amazonaws.jp"
-  private val shortURL = "http://amazon.jp/dp/"
 
   // 初期化
   val mac = {
@@ -112,7 +111,7 @@ object Amazon {
    * */
   private def urlShortener(url: String) = {
     val json = s"""{\"longUrl\": \"$url\"}"""
-    val result = Http.postData(s"""https://www.googleapis.com/urlshortener/v1/url?key=${Environment.amazonApiKey}""", json)
+    val result = Http.postData(s"""https://www.googleapis.com/urlshortener/v1/url?key=${Environment.googleApiKey}""", json)
       .header("content-type", "application/json")
       .option(HttpOptions.connTimeout(10000))
       .option(HttpOptions.readTimeout(50000))

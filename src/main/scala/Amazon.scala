@@ -11,7 +11,9 @@ import scala.collection.immutable.{Seq, TreeMap}
 import scala.io.Source
 import scala.collection.JavaConversions._
 import scala.xml.parsing.ConstructingParser
-
+import scalaj.http.{HttpOptions, Http}
+import org.json4s.DefaultFormats
+import org.json4s.native.JsonMethods._
 /**
  * Created by FScoward on 2014/11/21.
  */
@@ -41,10 +43,8 @@ object Amazon {
     val params = Map("Operation" -> "ItemSearch", "SearchIndex" -> "All", "AssociateTag" -> "coward0d-22", "Keywords" -> keyword)
     val url = sign(params)
     val xml = ConstructingParser.fromSource(Source.fromURL(url, UTF8_CHARSET), false)
-    
     val items = xml.document().docElem \ "Items" \ "Item"
-    val asin = items \ "ASIN"
-    asin.map(shortURL + _.text).head
+    urlShortner(items \ "DetailPageURL" text).values.toString
   }
 
   /**
@@ -105,5 +105,18 @@ object Amazon {
     } catch {
       case e: UnsupportedEncodingException => string
     }
+  }
+  
+  /**
+   * google の URL Shortener API を使用して短縮URLに変換
+   * */
+  private def urlShortener(url: String) = {
+    val json = s"""{\"longUrl\": \"$url\"}"""
+    val result = Http.postData(s"""https://www.googleapis.com/urlshortener/v1/url?key=${Environment.amazonApiKey}""", json)
+      .header("content-type", "application/json")
+      .option(HttpOptions.connTimeout(10000))
+      .option(HttpOptions.readTimeout(50000))
+      .charset(UTF8_CHARSET)
+    parse(result.asString) \ "id"
   }
 }

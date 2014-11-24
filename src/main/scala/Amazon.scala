@@ -44,7 +44,7 @@ object Amazon {
     val url = sign(params)
     val xml = ConstructingParser.fromSource(Source.fromURL(url, UTF8_CHARSET), false)
     val items = xml.document().docElem \ "Items" \ "Item"
-    urlShortner(items \ "DetailPageURL" text).values.toString
+    urlShortener(items \ "DetailPageURL" text).values.toString
   }
 
   /**
